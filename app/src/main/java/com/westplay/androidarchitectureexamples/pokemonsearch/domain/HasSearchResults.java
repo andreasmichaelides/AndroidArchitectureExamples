@@ -1,8 +1,6 @@
 package com.westplay.androidarchitectureexamples.pokemonsearch.domain;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.Subject;
 
 /**
@@ -11,14 +9,14 @@ import io.reactivex.subjects.Subject;
 
 public class HasSearchResults {
 
-    private final Subject<Boolean> resultsPresent = BehaviorSubject.createDefault(false);
+    private final Subject<Boolean> resultsPresent;
+
+    public HasSearchResults(Subject<Boolean> resultsPresent) {
+        this.resultsPresent = resultsPresent;
+    }
 
     Observable<Boolean> hasSearchResults() {
         return resultsPresent;
-    }
-
-    Completable setSearchResultsAsDownloaded() {
-        return Completable.fromAction(() -> resultsPresent.onNext(true));
     }
 
 }

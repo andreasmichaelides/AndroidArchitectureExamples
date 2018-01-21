@@ -8,13 +8,20 @@ import com.westplay.androidarchitectureexamples.pokemonsearch.data.repository.Po
 import com.westplay.androidarchitectureexamples.pokemonsearch.data.repository.PokemonRepositoryImpl;
 import com.westplay.androidarchitectureexamples.pokemonsearch.domain.HasSearchResults;
 import com.westplay.androidarchitectureexamples.pokemonsearch.domain.SearchPokemon;
+import com.westplay.androidarchitectureexamples.pokemonsearch.domain.SetSearchResultsAsDownloaded;
 import com.westplay.androidarchitectureexamples.pokemonsearch.domain.ShouldRestoreSearch;
+
+import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.Subject;
 
 @Module(includes = PokemonModule.class)
 public abstract class PokemonSearchModule {
+
+    private static final String SUBJECT_SEARCH_RESULTS_DOWNLOADED = "SUBJECT_SEARCH_RESULTS_DOWNLOADED";
 
     @Provides
     @ActivityScope
@@ -34,10 +41,24 @@ public abstract class PokemonSearchModule {
         return new PokemonRepositoryImpl(pokemonApi, schedulersFacade);
     }
 
+    @Named(SUBJECT_SEARCH_RESULTS_DOWNLOADED)
     @Provides
     @ActivityScope
-    static SearchPokemon provideSearchPokemon(PokemonRepository pokemonRepository, HasSearchResults hasSearchResults) {
-        return new SearchPokemon(pokemonRepository, hasSearchResults);
+    static Subject<Boolean> provideSearchResultsAsDownloaded() {
+        return BehaviorSubject.createDefault(false);
+    }
+
+    @Provides
+    @ActivityScope
+    static SetSearchResultsAsDownloaded provideSetSearchResultsAsDownloaded(@Named(SUBJECT_SEARCH_RESULTS_DOWNLOADED)
+                                                                                    Subject<Boolean> resultsPresent) {
+        return new SetSearchResultsAsDownloaded(resultsPresent);
+    }
+
+    @Provides
+    @ActivityScope
+    static SearchPokemon provideSearchPokemon(PokemonRepository pokemonRepository, SetSearchResultsAsDownloaded setSearchResultsAsDownloaded) {
+        return new SearchPokemon(pokemonRepository, setSearchResultsAsDownloaded);
     }
 
     @Provides
@@ -48,7 +69,8 @@ public abstract class PokemonSearchModule {
 
     @Provides
     @ActivityScope
-    static HasSearchResults provideSearchStateManager() {
-        return new HasSearchResults();
+    static HasSearchResults provideHasSearchResults(@Named(SUBJECT_SEARCH_RESULTS_DOWNLOADED)
+                                                              Subject<Boolean> resultsPresent) {
+        return new HasSearchResults(resultsPresent);
     }
 }

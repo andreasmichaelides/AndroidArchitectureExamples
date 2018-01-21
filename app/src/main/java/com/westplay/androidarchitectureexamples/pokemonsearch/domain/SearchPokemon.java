@@ -12,15 +12,15 @@ import io.reactivex.Observable;
 public class SearchPokemon {
 
     private final PokemonRepository pokemonRepository;
-    private final HasSearchResults hasSearchResults;
+    private final SetSearchResultsAsDownloaded setSearchResultsAsDownloaded;
 
-    public SearchPokemon(PokemonRepository pokemonRepository, HasSearchResults hasSearchResults) {
+    public SearchPokemon(PokemonRepository pokemonRepository, SetSearchResultsAsDownloaded setSearchResultsAsDownloaded) {
         this.pokemonRepository = pokemonRepository;
-        this.hasSearchResults = hasSearchResults;
+        this.setSearchResultsAsDownloaded = setSearchResultsAsDownloaded;
     }
 
     public Observable<PokemonResponse> search(String pokemonName) {
-        return hasSearchResults.setSearchResultsAsDownloaded()
+        return setSearchResultsAsDownloaded.setSearchResultsAsDownloaded()
                 .andThen(pokemonRepository.searchPokemon(pokemonName));
     }
 }
